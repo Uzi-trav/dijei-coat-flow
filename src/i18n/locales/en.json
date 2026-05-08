@@ -1,0 +1,18 @@
+{
+  "app": {
+    "title": "My Dashboard",
+    "login": "Sign in",
+    "signup": "Create account",
+    "logout": "Sign out",
+    "loading": "Loading..."
+  },
+  "nav": {
+    "overview": "Overview",
+    "settings": "Settings"
+  },
+  "roles": {
+    "superadmin": "Super Admin",
+    "admin": "Admin",
+    "editor": "Editor"
+  }
+}
