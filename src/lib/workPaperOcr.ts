@@ -107,31 +107,57 @@ function makeDraftItem(
 }
 
 const WORK_PAPER_FIELD_LABELS = [
+  "project name",
+  "project",
+  "site name",
   "프로젝트",
+  "프로젝트명",
+  "현장명",
+  "공사명",
+  "사업명",
+  "product name",
+  "item name",
+  "product no",
+  "item no",
+  "part number",
+  "product",
+  "제품",
   "제품명",
+  "제품번호",
   "품목명",
+  "품목",
   "품명",
   "부품명",
+  "부품번호",
+  "품번",
   "수량",
   "LOT NO",
   "LOT NUMBER",
+  "LOT 번호",
+  "로트번호",
   "특이사항",
   "비고",
 ];
 
 function fieldValueAfterLabel(text: string, labels: string[]): string | undefined {
   const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const clean = (value: string) => value.replace(/^[\s:：#-]+/u, "").trim();
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
-    const label = labels.find((candidate) =>
+    const label = [...labels]
+      .sort((left, right) => normalizeProjectName(right).length - normalizeProjectName(left).length)
+      .find((candidate) =>
       normalizeProjectName(line).startsWith(normalizeProjectName(candidate)),
     );
     if (!label) continue;
 
-    const labelIndex = line.toLocaleLowerCase().indexOf(label.toLocaleLowerCase());
-    const inlineValue = labelIndex >= 0 ? line.slice(labelIndex + label.length).trim() : "";
-    const clean = (value: string) => value.replace(/^[\s:：#-]+/u, "").trim();
-    if (clean(inlineValue)) return clean(inlineValue);
+    const labelPattern = label
+      .split("")
+      .map((character) => character.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+      .join("\\s*");
+    const labelMatch = line.match(new RegExp(`^\\s*${labelPattern}\\s*[:：#-]?\\s*(.*)$`, "i"));
+    const inlineValue = clean(labelMatch?.[1] ?? "");
+    if (inlineValue) return inlineValue;
 
     for (let nextIndex = index + 1; nextIndex < Math.min(lines.length, index + 4); nextIndex += 1) {
       const candidate = lines[nextIndex];
@@ -156,6 +182,16 @@ function projectNames(project: DemoProject[]): Array<{ project: DemoProject; nam
 function findProjectMatch(text: string, projects: DemoProject[]): DemoProject | undefined {
   const normalizedText = normalizeProjectName(text);
   const names = projectNames(projects);
+  const sourceLines = text
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^(?:프로젝트명?|project(?:\s*name)?|현장명|공사명)\s*/i, "").trim())
+    .filter(Boolean);
+  const lines = [
+    ...sourceLines,
+    ...sourceLines.slice(0, -1).map((line, index) => `${line} ${sourceLines[index + 1]}`),
+  ]
+    .map(normalizeProjectName)
+    .filter((line) => line.length >= 4 && line.length <= 120);
   const exactMatches = names.filter(({ name }) => normalizedText.includes(name));
   if (exactMatches.length) {
     const longestLength = Math.max(...exactMatches.map(({ name }) => name.length));
@@ -167,16 +203,20 @@ function findProjectMatch(text: string, projects: DemoProject[]): DemoProject | 
     return bestProjects.size === 1 ? [...bestProjects.values()][0] : undefined;
   }
 
-  const sourceLines = text
-    .split(/\r?\n/)
-    .map((line) => line.replace(/^(?:프로젝트|project|현장명|공사명)\s*/i, "").trim())
-    .filter(Boolean);
-  const lines = [
-    ...sourceLines,
-    ...sourceLines.slice(0, -1).map((line, index) => `${line} ${sourceLines[index + 1]}`),
-  ]
-    .map(normalizeProjectName)
-    .filter((line) => line.length >= 4 && line.length <= 120);
+  const partialMatches = lines.flatMap((line) => names
+    .filter(({ name }) => name.includes(line))
+    .map(({ project }) => ({ project, length: line.length })))
+    .sort((left, right) => right.length - left.length);
+  if (partialMatches.length) {
+    const bestLength = partialMatches[0].length;
+    const bestProjects = new Map(
+      partialMatches
+        .filter(({ length }) => length === bestLength)
+        .map(({ project }) => [project.id, project]),
+    );
+    if (bestProjects.size === 1) return [...bestProjects.values()][0];
+  }
+
   const distance = (left: string, right: string): number => {
     const row = Array.from({ length: right.length + 1 }, (_, index) => index);
     for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
@@ -233,22 +273,21 @@ function findProjectMatch(text: string, projects: DemoProject[]): DemoProject | 
 
 function findItemMatch(text: string, items: DemoItem[], projectId?: string): DemoItem | undefined {
   const normalizedText = normalizeProjectName(text);
-  const candidates = projectId
-    ? items.filter((item) => item.project_id === projectId)
-    : [];
-  const source = candidates.length ? candidates : items;
-  const matches = source.flatMap((item) => {
+  const matches = items.flatMap((item) => {
     const searchableValues = [item.canonical_name, ...item.part_numbers]
       .map(normalizeProjectName)
       .filter((value) => value.length >= 3 && normalizedText.includes(value));
     const longestMatch = searchableValues.sort((left, right) => right.length - left.length)[0];
-    return longestMatch ? [{ item, length: longestMatch.length }] : [];
+    return longestMatch
+      ? [{ item, length: longestMatch.length, projectMatches: item.project_id === projectId }]
+      : [];
   }).sort((left, right) => right.length - left.length);
   if (!matches.length) return undefined;
+  const bestLength = matches[0].length;
+  const projectMatches = matches.filter((match) => match.length === bestLength && match.projectMatches);
+  const rankedMatches = projectMatches.length ? projectMatches : matches.filter((match) => match.length === bestLength);
   const bestItems = new Map(
-    matches
-      .filter(({ length }) => length === matches[0].length)
-      .map(({ item }) => [item.id, item]),
+    rankedMatches.map(({ item }) => [item.id, item]),
   );
   return bestItems.size === 1 ? [...bestItems.values()][0] : undefined;
 }
@@ -256,7 +295,7 @@ function findItemMatch(text: string, items: DemoItem[], projectId?: string): Dem
 function findObjectCount(text: string): DetectedQuantity | undefined {
   const countPattern = /(\d[\d,]*)\s*(set|ea|pcs?|개|대|량|장)(?![a-z])/i;
   const labeledPattern = /(?:수량|개수|객체\s*수|quantity)[^\d]{0,16}(\d[\d,]*)/i;
-  const labeledValue = fieldValueAfterLabel(text, ["수량"]);
+  const labeledValue = fieldValueAfterLabel(text, ["수량", "개수", "객체 수", "quantity"]);
   const labeledValueMatch = labeledValue?.match(/(\d[\d,]*)\s*([a-z]+)?/i);
   const labeledValueNumber = labeledValueMatch?.[1];
   if (labeledValueNumber) {
@@ -280,7 +319,7 @@ function findObjectCount(text: string): DetectedQuantity | undefined {
 }
 
 function findLotNumber(text: string): string | undefined {
-  const labeledValue = fieldValueAfterLabel(text, ["LOT NO", "LOT NUMBER"]);
+  const labeledValue = fieldValueAfterLabel(text, ["LOT NUMBER", "LOT NO", "LOT 번호", "로트번호"]);
   const labeledMatch = labeledValue?.match(/[A-Z0-9][A-Z0-9._/-]{1,30}/i);
   if (labeledMatch) return labeledMatch[0];
   const match = text.match(/(?:\bLOT(?:\s*(?:NO\.?|NUMBER))?|로트(?:\s*번호)?|LOT\s*번호)\s*[:：#]?\s*([A-Z0-9][A-Z0-9._/-]{1,30})/i);
@@ -293,21 +332,24 @@ export function suggestWorkRecordDraft(
   items: DemoItem[],
   previous?: WorkRecordDraft,
 ): WorkRecordDraft {
-  const recognizedProjectName = fieldValueAfterLabel(text, ["프로젝트", "현장명", "공사명"]);
-  const recognizedItemName = fieldValueAfterLabel(text, ["제품명", "품목명", "품명"]);
-  const recognizedPartNumber = fieldValueAfterLabel(text, ["부품명"]);
+  const recognizedProjectName = fieldValueAfterLabel(text, ["project name", "project", "site name", "프로젝트명", "프로젝트", "현장명", "공사명", "사업명"]);
+  const recognizedItemName = fieldValueAfterLabel(text, ["product name", "item name", "제품명", "품목명", "품명", "product", "item", "제품", "품목"]);
+  const recognizedPartNumber = fieldValueAfterLabel(text, ["part number", "product no", "item no", "부품번호", "제품번호", "품번", "부품명"]);
   const matchedProject = (recognizedProjectName
     ? findProjectMatch(recognizedProjectName, projects)
     : undefined)
     ?? findProjectMatch(text, projects);
-  const matchedItem = findItemMatch(recognizedItemName ?? text, items, matchedProject?.id);
+  const matchedItem = findItemMatch(
+    [recognizedItemName, recognizedPartNumber, text].filter(Boolean).join("\n"),
+    items,
+    matchedProject?.id,
+  );
   const objectCount = findObjectCount(text);
-  const unlistedProject = !matchedProject && recognizedProjectName ? recognizedProjectName : undefined;
 
   return {
-    projectId: matchedProject?.id ?? (unlistedProject ? "__new__" : previous?.projectId ?? ""),
-    projectSearch: matchedProject?.name ?? unlistedProject ?? previous?.projectSearch ?? "",
-    projectName: matchedProject ? "" : unlistedProject ?? previous?.projectName ?? "",
+    projectId: matchedProject?.id ?? (recognizedProjectName ? "" : previous?.projectId ?? ""),
+    projectSearch: matchedProject?.name ?? recognizedProjectName ?? previous?.projectSearch ?? "",
+    projectName: matchedProject ? "" : previous?.projectName ?? "",
     projectSpec: matchedProject
       ? {
         source_project_id: matchedProject.id,
@@ -319,7 +361,7 @@ export function suggestWorkRecordDraft(
         notes: (matchedProject.notes ?? []).join("\n"),
         source_text: matchedProject.source_text ?? "",
       }
-      : unlistedProject ? null : previous?.projectSpec ?? null,
+      : recognizedProjectName ? null : previous?.projectSpec ?? null,
     lotNumber: findLotNumber(text) ?? previous?.lotNumber ?? "",
     notes: previous?.notes ?? "",
     draftItems: [makeDraftItem(matchedItem, objectCount, previous?.draftItems[0], recognizedItemName, recognizedPartNumber)],

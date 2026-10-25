@@ -23,4 +23,5 @@ export interface WorkRecordDraft {
 export interface WorkerFlowState {
   draft?: WorkRecordDraft;
   imageDataUrl?: string;
+  ocrText?: string;
 }

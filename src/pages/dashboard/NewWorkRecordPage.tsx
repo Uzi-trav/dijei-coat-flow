@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Camera, Check, ChevronDown, LoaderCircle, Plus, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ChevronDown, ImagePlus, LoaderCircle, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -349,7 +349,7 @@ export default function NewWorkRecordPage() {
           <Button asChild variant="ghost" size="icon" aria-label={t("common.back")}>
             <Link to="/"><ArrowLeft aria-hidden="true" /></Link>
           </Button>
-          <img src="/dijei-coat-logo.png" alt="Dijei Coat" className="h-auto max-h-12 w-[170px] object-contain" />
+          <img src="/dijei-coat-emblem.png" alt="Dijei Coat" className="h-auto max-h-12 w-[190px] rounded bg-white px-1 object-contain" />
         </header>
       )}
       <div>
@@ -370,11 +370,18 @@ export default function NewWorkRecordPage() {
               <p className="font-medium">{t("scanner.imageAttached")}</p>
               <p className="mt-1 text-sm text-muted-foreground">{t("scanner.ocrUnavailable")}</p>
             </div>
-            <Button type="button" variant="outline" onClick={() => navigate("/scan", { state: { draft: workerDraft, imageDataUrl: flowState.imageDataUrl } })}>
-              <Camera aria-hidden="true" />{t("scanner.retake")}
+            <Button type="button" variant="outline" onClick={() => navigate("/scan", { state: { draft: workerDraft, imageDataUrl: flowState.imageDataUrl, ocrText: flowState.ocrText } })}>
+              <ImagePlus aria-hidden="true" />{t("scanner.replacePhoto")}
             </Button>
           </CardContent>
         </Card>
+      )}
+      {isWorkerFlow && flowState.ocrText && (
+        <details className="rounded-lg border border-border bg-muted/30 p-4">
+          <summary className="cursor-pointer font-medium">{t("scanner.ocrTextTitle")}</summary>
+          <p className="mt-2 text-sm text-muted-foreground">{t("scanner.ocrTextHelp")}</p>
+          <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap break-words rounded-md bg-background p-3 text-sm">{flowState.ocrText}</pre>
+        </details>
       )}
       {isWorkerFlow && (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 text-sm" role="note">

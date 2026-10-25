@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, ImagePlus, RotateCcw } from "lucide-react";
+import { ArrowLeft, Camera, RotateCcw, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { getDemoData } from "@/lib/demoStore";
@@ -22,84 +22,74 @@ export default function ScanWorkPaperPage() {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [imageDataUrl, setImageDataUrl] = useState(flowState.imageDataUrl ?? "");
+  const [ocrText, setOcrText] = useState(flowState.ocrText ?? "");
   const [imageError, setImageError] = useState<string | null>(null);
   const [ocrError, setOcrError] = useState<string | null>(null);
   const [recognizing, setRecognizing] = useState(false);
   const [recognitionProgress, setRecognitionProgress] = useState(0);
   const [cameraZoom, setCameraZoom] = useState(1);
   const [cameraZoomRange, setCameraZoomRange] = useState<{ min: number; max: number; step: number } | null>(null);
-  const [startingCamera, setStartingCamera] = useState(true);
+  const [startingCamera, setStartingCamera] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const activeStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    let activeStream: MediaStream | null = null;
-    let timeoutId: number | undefined;
+    return () => {
+      activeStreamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
 
-    async function openCamera() {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        setCameraError(t("scanner.cameraUnavailable"));
-        setStartingCamera(false);
-        return;
-      }
-
-      timeoutId = window.setTimeout(() => {
-        if (!cancelled) {
-          setCameraError(t("scanner.cameraPromptTimeout"));
-          setStartingCamera(false);
-        }
-      }, 12000);
-
-      try {
-        const cameraStream = await navigator.mediaDevices.getUserMedia({
-          audio: false,
-          video: {
-            facingMode: { ideal: "environment" },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
-          },
-        });
-        if (cancelled) {
-          cameraStream.getTracks().forEach((track) => track.stop());
-          return;
-        }
-        activeStream = cameraStream;
-        setStream(cameraStream);
-        const track = cameraStream.getVideoTracks()[0];
-        const capabilities = track?.getCapabilities() as (MediaTrackCapabilities & { zoom?: CameraZoomRange }) | undefined;
-        const zoom = capabilities?.zoom;
-        if (track && zoom && typeof zoom.min === "number" && typeof zoom.max === "number") {
-          setCameraZoomRange({
-            min: zoom.min,
-            max: zoom.max,
-            step: Math.max((zoom.max - zoom.min) / 20, 0.1),
-          });
-          const settings = track.getSettings() as MediaTrackSettings & { zoom?: number };
-          setCameraZoom(settings.zoom ?? zoom.min);
-        }
-        setCameraError(null);
-      } catch (error) {
-        if (cancelled) return;
-        const name = error instanceof DOMException ? error.name : "";
-        setCameraError(
-          name === "NotAllowedError" || name === "SecurityError"
-            ? t("scanner.cameraDenied")
-            : t("scanner.cameraUnavailable"),
-        );
-      } finally {
-        if (timeoutId !== undefined) window.clearTimeout(timeoutId);
-        if (!cancelled) setStartingCamera(false);
-      }
+  async function startCamera() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError(t("scanner.cameraUnavailable"));
+      return;
     }
 
-    void openCamera();
-    return () => {
-      cancelled = true;
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
-      activeStream?.getTracks().forEach((track) => track.stop());
-    };
-  }, [t]);
+    setStartingCamera(true);
+    setCameraError(null);
+    try {
+      const cameraStream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
+      });
+      activeStreamRef.current?.getTracks().forEach((track) => track.stop());
+      activeStreamRef.current = cameraStream;
+      setStream(cameraStream);
+      const track = cameraStream.getVideoTracks()[0];
+      const capabilities = track?.getCapabilities() as (MediaTrackCapabilities & { zoom?: CameraZoomRange }) | undefined;
+      const zoom = capabilities?.zoom;
+      if (track && zoom && typeof zoom.min === "number" && typeof zoom.max === "number") {
+        setCameraZoomRange({
+          min: zoom.min,
+          max: zoom.max,
+          step: Math.max((zoom.max - zoom.min) / 20, 0.1),
+        });
+        const settings = track.getSettings() as MediaTrackSettings & { zoom?: number };
+        setCameraZoom(settings.zoom ?? zoom.min);
+      }
+    } catch (error) {
+      const name = error instanceof DOMException ? error.name : "";
+      setCameraError(
+        name === "NotAllowedError" || name === "SecurityError"
+          ? t("scanner.cameraDenied")
+          : t("scanner.cameraUnavailable"),
+      );
+    } finally {
+      setStartingCamera(false);
+    }
+  }
+
+  function stopCamera() {
+    activeStreamRef.current?.getTracks().forEach((track) => track.stop());
+    activeStreamRef.current = null;
+    setStream(null);
+    setCameraZoomRange(null);
+  }
 
   useEffect(() => {
     const video = videoRef.current;
@@ -125,6 +115,8 @@ export default function ScanWorkPaperPage() {
       if (!context) throw new Error("Canvas context unavailable");
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       setImageDataUrl(canvas.toDataURL("image/jpeg", 0.9));
+      setOcrText("");
+      stopCamera();
       setImageError(null);
       setOcrError(null);
     } catch {
@@ -146,8 +138,10 @@ export default function ScanWorkPaperPage() {
     }
 
     setImageDataUrl("");
+    setOcrText("");
     setImageError(null);
     setOcrError(null);
+    stopCamera();
     const reader = new FileReader();
     reader.onerror = () => setImageError(t("scanner.imageReadFailed"));
     reader.onload = () => {
@@ -171,11 +165,13 @@ export default function ScanWorkPaperPage() {
       const result = await recognizeWorkPaper(imageDataUrl, setRecognitionProgress);
       const data = getDemoData();
       const draft = suggestWorkRecordDraft(result.text, data.projects, data.items, flowState.draft);
+      setOcrText(result.text);
       navigate("/work/review", {
         state: {
           ...flowState,
           draft,
           imageDataUrl,
+          ocrText: result.text,
         },
       });
     } catch (error) {
@@ -197,6 +193,7 @@ export default function ScanWorkPaperPage() {
         ...flowState,
         ...(flowState.draft ? { draft: flowState.draft } : {}),
         imageDataUrl,
+        ocrText: ocrText || undefined,
       },
     });
   }
@@ -208,13 +205,19 @@ export default function ScanWorkPaperPage() {
           <Link to="/" onClick={(event) => {
             if (flowState.draft) {
               event.preventDefault();
-              navigate("/work/review", { state: flowState });
+              navigate("/work/review", {
+                state: {
+                  ...flowState,
+                  imageDataUrl,
+                  ocrText: ocrText || undefined,
+                },
+              });
             }
           }}>
             <ArrowLeft aria-hidden="true" />
           </Link>
         </Button>
-        <img src="/dijei-coat-logo.png" alt="Dijei Coat" className="h-auto max-h-12 w-[170px] object-contain" />
+        <img src="/dijei-coat-emblem.png" alt="Dijei Coat" className="h-auto max-h-12 w-[190px] rounded bg-white px-1 object-contain" />
       </header>
 
       <main className="mx-auto w-full max-w-3xl space-y-5 px-4 py-6 sm:px-8 sm:py-8">
@@ -248,7 +251,7 @@ export default function ScanWorkPaperPage() {
             />
           ) : (
             <div className="flex min-h-64 items-center justify-center px-6 text-center text-sm text-white/80">
-              {startingCamera ? t("scanner.openingCamera") : cameraError ? t("scanner.cameraFallbackPrompt") : t("scanner.cameraUnavailable")}
+              {startingCamera ? t("scanner.openingCamera") : t("scanner.choosePhotoPrompt")}
             </div>
           )}
         </div>
@@ -286,6 +289,7 @@ export default function ScanWorkPaperPage() {
             <>
               <Button type="button" variant="outline" size="lg" className="min-h-12" onClick={() => {
                 setImageDataUrl("");
+                setOcrText("");
                 setImageError(null);
                 setOcrError(null);
               }}>
@@ -298,13 +302,20 @@ export default function ScanWorkPaperPage() {
             </>
           ) : (
             <>
-              <Button type="button" size="lg" className="min-h-12" onClick={capturePhoto} disabled={!stream}>
-                <Camera aria-hidden="true" />
-                {t("scanner.capture")}
-              </Button>
-              <Button type="button" variant="outline" size="lg" className="min-h-12" onClick={() => fileInputRef.current?.click()}>
-                <ImagePlus aria-hidden="true" />
+              <Button type="button" size="lg" className="min-h-12" onClick={() => fileInputRef.current?.click()}>
+                <Upload aria-hidden="true" />
                 {t("scanner.chooseImage")}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                className="min-h-12"
+                onClick={() => stream ? capturePhoto() : void startCamera()}
+                disabled={startingCamera}
+              >
+                <Camera aria-hidden="true" />
+                {startingCamera ? t("scanner.openingCamera") : stream ? t("scanner.capture") : t("scanner.openCamera")}
               </Button>
             </>
           )}
@@ -312,7 +323,7 @@ export default function ScanWorkPaperPage() {
         {imageDataUrl && (
           <div className="text-center">
             <Button type="button" variant="ghost" onClick={() => fileInputRef.current?.click()}>
-              <ImagePlus aria-hidden="true" />
+              <Upload aria-hidden="true" />
               {t("scanner.replacePhoto")}
             </Button>
           </div>

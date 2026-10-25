@@ -10,8 +10,8 @@ Mobile-first industrial coating work-record demo built with React, TypeScript, T
 - **Public shared test mode** — No sign-in; projects, items, work records, and document edits are shared through Supabase
 - **Installable PWA** — Install from the hosted link; deployments offer an update without reinstalling
 - **Worker homepage** — `/` opens the camera-first work-paper entry flow; `/dashboard` remains the back-office area
-- **Camera and gallery photo selection** — Use supported device-camera zoom, take a new photo, or explicitly choose/replace an existing gallery image; keep the source photo alongside the editable review form
-- **Korean/English work-paper OCR** — OCR.space auto-detects mixed-language text, corrects page rotation, and scales the compressed image; local matching checks the full recognized text and labeled project, product, quantity, and LOT fields, with similar project names offered for manual confirmation
+- **Camera and gallery photo selection** — Gallery upload is the first action; the camera opens only when requested. Use supported camera zoom, take a new photo, or replace it with a gallery image; keep the source photo alongside the editable review form
+- **Korean/English work-paper OCR** — OCR.space auto-detects mixed-language text, corrects page rotation, and scales the compressed image; local matching checks the full recognized text and labeled project, product, quantity, and LOT fields against the project and item masters. The full OCR text is available in review; similar project names are offered for manual confirmation
 - **Order documents** — Edit and save a Dijei Coat work-paper sheet and invoice for any saved order; print or save either sheet as PDF, and export a compact invoice workbook with item, unit price, quantity, and total columns
 - **Explicit review before saving** — Manual and scanned entries share the same validation and confirmation flow
 - **47 supplied project specifications** — Imported into browser storage on first use, searchable by project name and manually maintained aliases

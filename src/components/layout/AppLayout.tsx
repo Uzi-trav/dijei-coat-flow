@@ -19,7 +19,7 @@ export default function AppLayout() {
         {collapsed ? (
           <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground" aria-label="Dijei Coat">DC</span>
         ) : (
-          <img src="/dijei-coat-logo.png" alt="Dijei Coat" className="h-auto max-h-12 w-full max-w-[190px] object-contain" />
+          <img src="/dijei-coat-emblem.png" alt="Dijei Coat" className="h-auto max-h-12 w-full max-w-[190px] rounded bg-white px-1 object-contain" />
         )}
       </div>
     </div>

@@ -20,7 +20,7 @@ export default function WorkerHomePage() {
     <div className="min-h-screen bg-background">
       <header className="flex h-16 items-center justify-between border-b border-border bg-card px-4 sm:px-8">
         <Link to="/" className="flex items-center gap-3" aria-label={t("worker.homeLabel")}>
-          <img src="/dijei-coat-logo.png" alt="Dijei Coat" className="h-auto max-h-12 w-[190px] object-contain" />
+          <img src="/dijei-coat-emblem.png" alt="Dijei Coat" className="h-auto max-h-12 w-[190px] rounded bg-white px-1 object-contain" />
         </Link>
 
         <Sheet open={menuOpen} onOpenChange={setMenuOpen}>

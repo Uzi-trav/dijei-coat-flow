@@ -192,7 +192,7 @@ export default defineConfig(({ mode }) => {
       ocrSpacePlugin(env.OCR_SPACE_API_KEY ?? ""),
       VitePWA({
         registerType: "prompt",
-        includeAssets: ["dijei-coat-logo.png"],
+        includeAssets: ["dijei-coat-emblem.png"],
         manifest: {
           name: "Dijei Coat Work Management",
           short_name: "Dijei Coat",
