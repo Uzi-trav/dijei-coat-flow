@@ -1,35 +1,34 @@
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import {
-  LayoutDashboard,
-  Settings,
-} from "lucide-react";
-import type { Role } from "@/types/database";
+import { ClipboardList, LayoutDashboard, Plus, Settings2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface NavItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
-  roles: Role[];
 }
 
 const navItems: NavItem[] = [
-  { label: "Overview", href: "/dashboard", icon: LayoutDashboard, roles: ["superadmin", "admin", "editor"] },
-  { label: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["superadmin"] },
+  { label: "nav.overview", href: "/dashboard", icon: LayoutDashboard },
+  { label: "nav.newRecord", href: "/dashboard/new-record", icon: Plus },
+  { label: "nav.history", href: "/dashboard/history", icon: ClipboardList },
+  { label: "nav.masterData", href: "/dashboard/projects-items", icon: Settings2 },
 ];
 
-export function SidebarNav({ collapsed }: { collapsed: boolean }) {
-  const { role } = useAuth();
+export function SidebarNav({
+  collapsed,
+  onNavigate,
+}: {
+  collapsed: boolean;
+  onNavigate?: () => void;
+}) {
   const location = useLocation();
-
-  const filtered = navItems.filter(
-    (item) => role && item.roles.includes(role)
-  );
+  const { t } = useTranslation();
 
   return (
-    <nav className="flex flex-col gap-1 p-2">
-      {filtered.map((item) => {
+    <nav className="flex flex-col gap-1 px-3 py-5">
+      {navItems.map((item) => {
         const active =
           item.href === "/dashboard"
             ? location.pathname === "/dashboard"
@@ -38,15 +37,16 @@ export function SidebarNav({ collapsed }: { collapsed: boolean }) {
           <Link
             key={item.href}
             to={item.href}
+            onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
               active
                 ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                : "text-sidebar-foreground hover:bg-secondary hover:text-foreground"
             )}
           >
-            <item.icon className="h-4 w-4 shrink-0" />
-            {!collapsed && <span>{item.label}</span>}
+            <item.icon className={cn("h-[18px] w-[18px] shrink-0", active && "text-primary")} />
+            {!collapsed && <span>{t(item.label)}</span>}
           </Link>
         );
       })}

@@ -1,18 +1,8 @@
-import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { PanelLeft, LogOut, Sun, Moon, Monitor } from "lucide-react";
+import { PanelLeft, Sun, Moon, Monitor } from "lucide-react";
 import type { Theme } from "@/hooks/useTheme";
+import { useTranslation } from "react-i18next";
 
 interface TopbarProps {
   onToggleSidebar: () => void;
@@ -25,9 +15,8 @@ const themeIcons: Record<Theme, typeof Sun> = {
 };
 
 export function Topbar({ onToggleSidebar }: TopbarProps) {
-  const { user, role, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
-  const initials = user?.email?.slice(0, 2).toUpperCase() ?? "U";
+  const { t, i18n } = useTranslation();
 
   function cycleTheme() {
     const order: Theme[] = ["light", "dark", "system"];
@@ -38,52 +27,38 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
   const ThemeIcon = themeIcons[theme];
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b border-border bg-card px-4">
+    <header className="flex h-16 items-center gap-3 border-b border-border bg-card px-4 sm:px-6">
       <Button
         variant="ghost"
         size="icon"
         onClick={onToggleSidebar}
-        className="shrink-0"
+        className="hidden shrink-0 text-muted-foreground hover:text-foreground md:inline-flex"
       >
         <PanelLeft className="h-5 w-5" />
       </Button>
 
       <div className="flex-1" />
 
+      <label className="sr-only" htmlFor="language-select">{t("app.language")}</label>
+      <select
+        id="language-select"
+        aria-label={t("app.language")}
+        value={i18n.resolvedLanguage?.startsWith("en") ? "en" : "ko"}
+        onChange={(event) => void i18n.changeLanguage(event.target.value)}
+        className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-ring/20"
+      >
+        <option value="ko">{t("app.korean")}</option>
+        <option value="en">{t("app.english")}</option>
+      </select>
       <Button
         variant="ghost"
         size="icon"
         onClick={cycleTheme}
-        title={`Theme: ${theme}`}
+        title={t("app.theme", { theme })}
+        className="text-muted-foreground hover:text-foreground"
       >
         <ThemeIcon className="h-5 w-5" />
       </Button>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-8 gap-2 px-2">
-            <Avatar className="h-7 w-7">
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-            </Avatar>
-            <span className="hidden text-sm font-medium md:inline">
-              {user?.email}
-            </span>
-            {role && (
-              <Badge variant="secondary" className="hidden md:inline-flex text-[10px]">
-                {role}
-              </Badge>
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end">
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={signOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
     </header>
   );
 }

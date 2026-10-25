@@ -16,6 +16,9 @@ dist-ssr/
 .env.local
 .env.*.local
 
+# Local work-paper examples and assets are not part of the public app
+/public/scan/
+
 # Editor
 .vscode/*
 !.vscode/extensions.json

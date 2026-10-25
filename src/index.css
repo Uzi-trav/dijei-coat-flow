@@ -1,9 +1,8 @@
 @import "tailwindcss";
 
 @theme inline {
-  --radius: 0.625rem;
-
-  --font-sans: system-ui, sans-serif;
+  --radius: 0.75rem;
+  --font-sans: "Inter", "Segoe UI", sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -41,86 +40,384 @@
 }
 
 :root {
-  --background: hsl(0 0% 100%);
-  --foreground: hsl(0 0% 3.9%);
+  --background: hsl(210 20% 98%);
+  --foreground: hsl(216 15% 18%);
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(0 0% 3.9%);
+  --card-foreground: hsl(216 15% 18%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(0 0% 3.9%);
-  --primary: hsl(0 0% 9%);
-  --primary-foreground: hsl(0 0% 98%);
-  --secondary: hsl(0 0% 96.1%);
-  --secondary-foreground: hsl(0 0% 9%);
-  --muted: hsl(0 0% 96.1%);
-  --muted-foreground: hsl(0 0% 45.1%);
-  --accent: hsl(0 0% 96.1%);
-  --accent-foreground: hsl(0 0% 9%);
-  --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(0 0% 89.8%);
-  --input: hsl(0 0% 89.8%);
-  --ring: hsl(0 0% 3.9%);
-  --chart-1: hsl(12 76% 61%);
-  --chart-2: hsl(173 58% 39%);
-  --chart-3: hsl(197 37% 24%);
-  --chart-4: hsl(43 74% 66%);
-  --chart-5: hsl(27 87% 67%);
-  --radius: 0.5rem;
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
-  --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --popover-foreground: hsl(216 15% 18%);
+  --primary: hsl(214 82% 51%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(210 17% 96%);
+  --secondary-foreground: hsl(216 15% 22%);
+  --muted: hsl(210 17% 96%);
+  --muted-foreground: hsl(215 10% 46%);
+  --accent: hsl(214 100% 96%);
+  --accent-foreground: hsl(214 82% 39%);
+  --destructive: hsl(0 72% 52%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(214 17% 88%);
+  --input: hsl(214 17% 88%);
+  --ring: hsl(214 82% 51%);
+  --chart-1: hsl(214 82% 51%);
+  --chart-2: hsl(161 55% 42%);
+  --chart-3: hsl(35 90% 55%);
+  --chart-4: hsl(273 55% 58%);
+  --chart-5: hsl(0 65% 58%);
+  --radius: 0.75rem;
+  --sidebar: hsl(210 20% 98%);
+  --sidebar-foreground: hsl(216 12% 30%);
+  --sidebar-primary: hsl(214 82% 51%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(214 100% 94%);
+  --sidebar-accent-foreground: hsl(214 82% 37%);
+  --sidebar-border: hsl(214 17% 90%);
+  --sidebar-ring: hsl(214 82% 51%);
 }
 
 .dark {
-  --background: hsl(0 0% 3.9%);
-  --foreground: hsl(0 0% 98%);
-  --card: hsl(0 0% 3.9%);
-  --card-foreground: hsl(0 0% 98%);
-  --popover: hsl(0 0% 3.9%);
-  --popover-foreground: hsl(0 0% 98%);
-  --primary: hsl(0 0% 98%);
-  --primary-foreground: hsl(0 0% 9%);
-  --secondary: hsl(0 0% 14.9%);
-  --secondary-foreground: hsl(0 0% 98%);
-  --muted: hsl(0 0% 14.9%);
-  --muted-foreground: hsl(0 0% 63.9%);
-  --accent: hsl(0 0% 14.9%);
-  --accent-foreground: hsl(0 0% 98%);
-  --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(0 0% 14.9%);
-  --input: hsl(0 0% 14.9%);
-  --ring: hsl(0 0% 83.1%);
-  --chart-1: hsl(220 70% 50%);
-  --chart-2: hsl(160 60% 45%);
-  --chart-3: hsl(30 80% 55%);
-  --chart-4: hsl(280 65% 60%);
-  --chart-5: hsl(340 75% 55%);
-  --sidebar: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --background: hsl(220 16% 12%);
+  --foreground: hsl(210 20% 96%);
+  --card: hsl(220 15% 15%);
+  --card-foreground: hsl(210 20% 96%);
+  --popover: hsl(220 15% 15%);
+  --popover-foreground: hsl(210 20% 96%);
+  --primary: hsl(214 90% 68%);
+  --primary-foreground: hsl(220 20% 12%);
+  --secondary: hsl(220 13% 20%);
+  --secondary-foreground: hsl(210 20% 94%);
+  --muted: hsl(220 13% 20%);
+  --muted-foreground: hsl(215 12% 68%);
+  --accent: hsl(214 42% 22%);
+  --accent-foreground: hsl(214 90% 82%);
+  --destructive: hsl(0 65% 58%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(220 12% 27%);
+  --input: hsl(220 12% 27%);
+  --ring: hsl(214 90% 68%);
+  --chart-1: hsl(214 90% 68%);
+  --chart-2: hsl(161 55% 54%);
+  --chart-3: hsl(35 90% 64%);
+  --chart-4: hsl(273 65% 72%);
+  --chart-5: hsl(0 75% 68%);
+  --sidebar: hsl(220 16% 12%);
+  --sidebar-foreground: hsl(210 16% 83%);
+  --sidebar-primary: hsl(214 90% 68%);
+  --sidebar-primary-foreground: hsl(220 20% 12%);
+  --sidebar-accent: hsl(214 35% 22%);
+  --sidebar-accent-foreground: hsl(214 90% 82%);
+  --sidebar-border: hsl(220 12% 25%);
+  --sidebar-ring: hsl(214 90% 68%);
 }
 
-body {
-  margin: 0;
-  background: var(--background);
-  color: var(--foreground);
+* {
+  box-sizing: border-box;
 }
 
 html {
   color-scheme: light;
+  scroll-behavior: smooth;
 }
 
 html.dark {
   color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background: hsl(214 90% 88%);
+}
+
+.work-paper {
+  max-width: 190mm;
+  margin: 0 auto;
+  background: #fff;
+  color: #111827;
+  font-family: "Malgun Gothic", "Noto Sans KR", "Segoe UI", sans-serif;
+}
+
+.work-paper-header {
+  display: grid;
+  grid-template-columns: 0.8fr 2fr;
+  align-items: stretch;
+  border: 1.5px solid #1f2937;
+  border-bottom: 0;
+}
+
+.work-paper-company {
+  display: grid;
+  align-content: center;
+  padding: 14px;
+  border-right: 1px solid #475569;
+  font-size: 20px;
+  font-weight: 750;
+  text-align: center;
+}
+
+.work-paper-heading {
+  padding: 9px 14px;
+  text-align: center;
+}
+
+.work-paper-heading h2 {
+  margin: 0;
+  font-size: 29px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.work-paper-heading p {
+  margin: 4px 0 0;
+  color: #475569;
+  font-size: 11px;
+}
+
+.work-paper-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+}
+
+.work-paper-table th,
+.work-paper-table td {
+  height: 45px;
+  border: 1px solid #475569;
+  padding: 9px 11px;
+  text-align: left;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.work-paper-table tbody th {
+  width: 24%;
+  background: #f1f5f9;
+  font-weight: 650;
+}
+
+.work-paper-fields {
+  table-layout: fixed;
+}
+
+.work-paper-fields th:nth-child(1),
+.work-paper-fields th:nth-child(3) {
+  width: 18%;
+}
+
+.work-paper-fields td:nth-child(2) {
+  width: 32%;
+}
+
+.work-paper-fields td:nth-child(4) {
+  width: 32%;
+}
+
+.work-paper-section-title {
+  margin-top: 14px;
+  border: 1px solid #475569;
+  background: #e8eef5;
+  padding: 9px 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.work-paper-coats thead th {
+  height: 35px;
+  background: #f1f5f9;
+  font-weight: 700;
+}
+
+.work-paper-coats tbody th {
+  width: 24%;
+}
+
+.work-paper-coats td:last-child {
+  width: 25%;
+}
+
+.work-paper-special {
+  min-height: 92px;
+  margin-top: 14px;
+  border: 1px solid #475569;
+}
+
+.work-paper-special h3 {
+  margin: 0;
+  border-bottom: 1px solid #64748b;
+  background: #f1f5f9;
+  padding: 8px 11px;
+  font-size: 13px;
+}
+
+.work-paper-special p {
+  min-height: 60px;
+  margin: 0;
+  padding: 10px 11px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.work-paper-signatures {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 18px;
+  margin-top: 25px;
+  font-size: 12px;
+}
+
+.work-paper-signatures > div {
+  display: flex;
+  min-height: 30px;
+  align-items: end;
+  gap: 8px;
+  border-bottom: 1px solid #64748b;
+  padding-bottom: 5px;
+}
+
+.work-paper-signatures i {
+  flex: 1;
+  font-style: normal;
+}
+
+.simple-invoice {
+  max-width: 190mm;
+  min-height: 190mm;
+  margin: 0 auto;
+  color: #111827;
+}
+
+.simple-invoice > header {
+  border-bottom: 4px solid #166534;
+  padding-bottom: 14px;
+  color: #166534;
+}
+
+.simple-invoice > header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.simple-invoice > header p {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+}
+
+.simple-invoice-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin: 22px 0 28px;
+  border: 1px solid #64748b;
+  padding: 13px 16px;
+}
+
+.simple-invoice-meta p {
+  margin: 0;
+  min-height: 24px;
+}
+
+.simple-invoice table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.simple-invoice thead {
+  background: #166534;
+  color: #fff;
+}
+
+.simple-invoice th,
+.simple-invoice td {
+  border: 1px solid #64748b;
+  padding: 12px 10px;
+  text-align: right;
+}
+
+.simple-invoice th:first-child,
+.simple-invoice td:first-child {
+  width: 40%;
+  text-align: left;
+}
+
+.simple-invoice tbody tr:nth-child(odd) {
+  background: #f1f5f9;
+}
+
+.simple-invoice-total th,
+.simple-invoice-total td {
+  border-top: 2px solid #1f2937;
+  background: #e8eef5 !important;
+  font-size: 16px;
+  font-weight: 750;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  body {
+    background: #fff !important;
+    color: #111827 !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #print-document,
+  #print-document * {
+    visibility: visible !important;
+  }
+
+  #print-document {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    color: #111827 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .work-paper,
+  .simple-invoice {
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    break-inside: avoid;
+  }
+
+  .work-paper-table th,
+  .work-paper-section-title,
+  .work-paper-coats thead th,
+  .work-paper-special h3,
+  .simple-invoice thead,
+  .simple-invoice-total th,
+  .simple-invoice-total td {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
 }

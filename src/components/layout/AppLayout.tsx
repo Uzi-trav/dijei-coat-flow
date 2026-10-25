@@ -1,50 +1,41 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { SidebarNav } from "./SidebarNav";
 import { Topbar } from "./Topbar";
 import { Menu } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function AppLayout() {
-  const { loading } = useAuth();
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Skeleton className="h-96 w-full max-w-4xl" />
-      </div>
-    );
-  }
-
   const sidebarContent = (
-    <div className="flex h-full flex-col">
-      <div className="flex h-14 items-center border-b border-sidebar-border px-3">
-        <span
-          className="font-semibold text-sidebar-foreground overflow-hidden whitespace-nowrap"
-        >
-          {collapsed ? "LP" : "LaunchPad"}
-        </span>
+    <div className="flex h-full flex-col bg-sidebar">
+      <div className="flex h-16 items-center border-b border-sidebar-border px-4">
+      <div className="flex min-w-0 items-center gap-3">
+        {collapsed ? (
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground" aria-label="Dijei Coat">DC</span>
+        ) : (
+          <img src="/dijei-coat-logo.png" alt="Dijei Coat" className="h-auto max-h-12 w-full max-w-[190px] object-contain" />
+        )}
       </div>
-      <SidebarNav collapsed={collapsed} />
+    </div>
+      <SidebarNav collapsed={collapsed} onNavigate={() => setMobileOpen(false)} />
     </div>
   );
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
-      {/* Desktop sidebar */}
       <aside
-        className="hidden border-r border-sidebar-border bg-sidebar transition-all md:block"
-        style={{ width: collapsed ? 64 : 240 }}
+        className="hidden border-r border-sidebar-border bg-sidebar transition-[width] duration-200 md:block"
+        style={{ width: collapsed ? 68 : 248 }}
       >
         {sidebarContent}
       </aside>
 
-      {/* Mobile sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetTrigger asChild>
           <Button
@@ -55,15 +46,21 @@ export default function AppLayout() {
             <Menu className="h-5 w-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-60 p-0">
+        <SheetContent side="left" className="w-60 border-r border-sidebar-border bg-sidebar p-0 text-sidebar-foreground">
           {sidebarContent}
         </SheetContent>
       </Sheet>
 
       <div className="flex flex-1 flex-col">
         <Topbar onToggleSidebar={() => setCollapsed((c) => !c)} />
-        <main className="flex-1 p-6">
-          <Outlet />
+        <div className="flex flex-wrap items-center justify-center gap-x-2 border-b border-border bg-accent/50 px-5 py-2 text-center text-xs text-muted-foreground">
+          <span className="font-medium text-accent-foreground">{t("app.localDemo")}</span>
+          <span>{t("app.localNotice")}</span>
+        </div>
+        <main className="flex-1 px-5 py-8 sm:px-8 sm:py-10 lg:px-12">
+          <div className="mx-auto max-w-6xl">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
