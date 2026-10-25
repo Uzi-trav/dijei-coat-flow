@@ -181,7 +181,7 @@ export default function ScanWorkPaperPage() {
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
       setOcrError(
-        message.startsWith("OCR exceeded 7 seconds")
+        message.startsWith("OCR timed out")
           ? t("scanner.ocrTimedOut")
           : message || t("scanner.ocrFailed"),
       );
@@ -309,6 +309,14 @@ export default function ScanWorkPaperPage() {
             </>
           )}
         </div>
+        {imageDataUrl && (
+          <div className="text-center">
+            <Button type="button" variant="ghost" onClick={() => fileInputRef.current?.click()}>
+              <ImagePlus aria-hidden="true" />
+              {t("scanner.replacePhoto")}
+            </Button>
+          </div>
+        )}
 
         {recognizing && (
           <div className="space-y-2" role="status" aria-live="polite">
@@ -321,7 +329,6 @@ export default function ScanWorkPaperPage() {
           ref={fileInputRef}
           type="file"
           accept="image/*"
-          capture="environment"
           className="sr-only"
           aria-label={t("scanner.chooseImage")}
           onChange={(event) => {

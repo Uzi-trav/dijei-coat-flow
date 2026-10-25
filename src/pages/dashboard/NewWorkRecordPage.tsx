@@ -476,7 +476,11 @@ export default function NewWorkRecordPage() {
                 {selectedProject && <p className="text-sm text-emerald-700 dark:text-emerald-300">{t("record.projectSelected", { name: selectedProject.name })}</p>}
                 {isUnlistedProject && <p className="text-sm text-amber-700 dark:text-amber-300">{t("record.unlistedProjectNotice")}</p>}
                 {projectPickerOpen && !isUnlistedProject && (
-                  <div id="project-options" className="mt-1 max-h-64 overflow-y-auto rounded-md border bg-background shadow-md" role="listbox" aria-label={t("record.projectMatches")}>
+                  <>
+                    {projectSearch.trim() && matchingProjects.length > 0 && (
+                      <p className="mt-2 text-xs text-muted-foreground">{t("record.projectMatchReview")}</p>
+                    )}
+                    <div id="project-options" className="mt-1 max-h-64 overflow-y-auto rounded-md border bg-background shadow-md" role="listbox" aria-label={t("record.projectMatches")}>
                     {matchingProjects.map((project) => (
                       <button key={project.id} type="button" role="option" aria-selected={projectId === project.id} className="flex min-h-12 w-full items-center justify-between gap-3 border-b px-3 py-2 text-left last:border-b-0 hover:bg-muted/60" onClick={() => selectProject(project)}>
                         <span>
@@ -494,7 +498,8 @@ export default function NewWorkRecordPage() {
                         {t("record.useUnlistedProject", { name: projectSearch })}
                       </button>
                     )}
-                  </div>
+                    </div>
+                  </>
                 )}
               </div>
               <div className="space-y-2">

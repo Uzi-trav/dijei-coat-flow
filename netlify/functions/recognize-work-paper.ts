@@ -45,11 +45,13 @@ export default async function recognizeWorkPaper(request: Request): Promise<Resp
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 6500);
+  const timeoutId = setTimeout(() => controller.abort(), 8500);
   try {
     const formData = new FormData();
     formData.set("file", new Blob([imageBytes], { type: mimeType }), "work-paper.jpg");
-    formData.set("language", "kor");
+    formData.set("language", "auto");
+    formData.set("detectOrientation", "true");
+    formData.set("scale", "true");
     formData.set("OCREngine", "2");
     formData.set("isOverlayRequired", "false");
     const response = await fetch("https://api.ocr.space/parse/image", {
@@ -90,7 +92,7 @@ export default async function recognizeWorkPaper(request: Request): Promise<Resp
     console.error("OCR.space recognition failed:", error);
     return jsonResponse(502, {
       error: error instanceof Error && error.name === "AbortError"
-        ? "OCR exceeded 7 seconds. Try again or continue manually."
+        ? "OCR timed out. Try again or continue manually."
         : "OCR.space could not read this photo.",
     });
   } finally {

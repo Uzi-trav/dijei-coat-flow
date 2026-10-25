@@ -83,11 +83,13 @@ function ocrSpacePlugin(apiKey: string): Plugin {
           }
 
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 6500);
+          const timeoutId = setTimeout(() => controller.abort(), 8500);
           try {
             const formData = new FormData();
             formData.set("file", new Blob([Uint8Array.from(imageBytes)], { type: mimeType }), "work-paper.jpg");
-            formData.set("language", "kor");
+            formData.set("language", "auto");
+            formData.set("detectOrientation", "true");
+            formData.set("scale", "true");
             formData.set("OCREngine", "2");
             formData.set("isOverlayRequired", "false");
             const ocrResponse = await fetch(
@@ -141,7 +143,7 @@ function ocrSpacePlugin(apiKey: string): Plugin {
             response.setHeader("Content-Type", "application/json");
             response.end(JSON.stringify({
               error: error instanceof Error && error.name === "AbortError"
-                ? "OCR exceeded 7 seconds. Try again or continue manually."
+                ? "OCR timed out. Try again or continue manually."
                 : error instanceof Error ? error.message : "OCR.space could not read this photo.",
             }));
           } finally {

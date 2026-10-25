@@ -56,7 +56,7 @@ export async function recognizeWorkPaper(
   const ocrImage = await compressImageForOcr(dataUrl);
   onProgress(10);
   const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), 7000);
+  const timeoutId = window.setTimeout(() => controller.abort(), 11000);
   try {
     const response = await fetch("/api/work-paper/recognize", {
       method: "POST",
@@ -75,7 +75,7 @@ export async function recognizeWorkPaper(
     return { text: result.text, confidence: null, rotation: null };
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
-      throw new Error("OCR exceeded 7 seconds. Try again or continue manually.", { cause: error });
+      throw new Error("OCR timed out. Try again or continue manually.", { cause: error });
     }
     throw error;
   } finally {
@@ -167,9 +167,15 @@ function findProjectMatch(text: string, projects: DemoProject[]): DemoProject | 
     return bestProjects.size === 1 ? [...bestProjects.values()][0] : undefined;
   }
 
-  const lines = text
+  const sourceLines = text
     .split(/\r?\n/)
-    .map((line) => normalizeProjectName(line.replace(/^(?:프로젝트|project|현장명|공사명)\s*/i, "")))
+    .map((line) => line.replace(/^(?:프로젝트|project|현장명|공사명)\s*/i, "").trim())
+    .filter(Boolean);
+  const lines = [
+    ...sourceLines,
+    ...sourceLines.slice(0, -1).map((line, index) => `${line} ${sourceLines[index + 1]}`),
+  ]
+    .map(normalizeProjectName)
     .filter((line) => line.length >= 4 && line.length <= 120);
   const distance = (left: string, right: string): number => {
     const row = Array.from({ length: right.length + 1 }, (_, index) => index);
@@ -290,7 +296,10 @@ export function suggestWorkRecordDraft(
   const recognizedProjectName = fieldValueAfterLabel(text, ["프로젝트", "현장명", "공사명"]);
   const recognizedItemName = fieldValueAfterLabel(text, ["제품명", "품목명", "품명"]);
   const recognizedPartNumber = fieldValueAfterLabel(text, ["부품명"]);
-  const matchedProject = findProjectMatch(recognizedProjectName ?? text, projects);
+  const matchedProject = (recognizedProjectName
+    ? findProjectMatch(recognizedProjectName, projects)
+    : undefined)
+    ?? findProjectMatch(text, projects);
   const matchedItem = findItemMatch(recognizedItemName ?? text, items, matchedProject?.id);
   const objectCount = findObjectCount(text);
   const unlistedProject = !matchedProject && recognizedProjectName ? recognizedProjectName : undefined;
